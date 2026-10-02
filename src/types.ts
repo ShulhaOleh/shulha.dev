@@ -35,6 +35,7 @@ export interface SkillGroup {
 
 export interface Profile {
     name: string;
+    alternateNames: string[];
     role: string;
     location: string;
     languages: string[];

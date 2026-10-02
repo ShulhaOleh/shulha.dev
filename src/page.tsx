@@ -2,6 +2,7 @@ import { FrontPanel } from "./components/front.tsx";
 import { ProjectsPanel } from "./components/projects.tsx";
 import { Sidebar } from "./components/sidebar.tsx";
 import type { ViewModel } from "./data.ts";
+import { personJsonLd } from "./seo.ts";
 
 const bootScript = `(()=>{const d=document.documentElement;d.classList.add("js");d.dataset.tab=location.hash==="#projects"?"projects":"front";d.dataset.filter="all"})()`;
 
@@ -39,6 +40,7 @@ export function Page({ vm }: { vm: ViewModel }) {
 
                     <link rel="icon" href={vm.avatar} />
                     <link rel="apple-touch-icon" href={vm.avatar} />
+                    <script type="application/ld+json">{personJsonLd(profile)}</script>
 
                     <script>{bootScript}</script>
                     <link rel="stylesheet" href="../src/styles.css" />

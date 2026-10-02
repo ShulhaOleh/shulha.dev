@@ -4,6 +4,7 @@ import tailwind from "bun-plugin-tailwind";
 import { buildViewModel, loadSnapshot, root } from "../src/data.ts";
 import { renderOgImage } from "../src/og.ts";
 import { Page } from "../src/page.tsx";
+import { robotsTxt, sitemapXml } from "../src/seo.ts";
 
 const dev = process.argv.includes("--dev");
 const buildDir = join(root, ".build");
@@ -45,6 +46,8 @@ for (const file of fontFiles) {
 }
 
 await Bun.write(join(outDir, "og.png"), await renderOgImage(vm));
+await Bun.write(join(outDir, "robots.txt"), robotsTxt(vm.profile));
+await Bun.write(join(outDir, "sitemap.xml"), sitemapXml(vm.profile, new Date()));
 
 const ms = Math.round(performance.now() - started);
 console.log(`Built ${result.outputs.length + 1} files into dist/ in ${ms} ms.`);

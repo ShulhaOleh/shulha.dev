@@ -3,6 +3,7 @@ import { tech } from "./tech.ts";
 
 export const profile: Profile = {
     name: "Oleh Shulha",
+    alternateNames: ["Олег Шульга", "ShulhaOleh"],
     role: "CS student, UAlbany",
     location: "Albany, NY",
     languages: ["English", "Ukrainian", "Russian"],
