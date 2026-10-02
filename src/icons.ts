@@ -13,6 +13,7 @@ const lucide = {
     merged: "git-merge",
     open: "git-pull-request",
     star: "star",
+    mail: "mail",
 } as const;
 
 const tabler = {

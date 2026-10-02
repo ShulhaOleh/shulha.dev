@@ -12,6 +12,7 @@ export const profile: Profile = {
         "Computer Science student at the University at Albany. Rust and TypeScript. Building Modrex, maintaining Refract.",
     intro: "Computer Science student at the University at Albany. I write Rust, TypeScript and C#, and right now I'm building Modrex, a mod manager for Windows and Linux, and co-maintaining Refract, a Minecraft launcher. Looking for a software engineering internship.",
     links: [
+        { label: "oleh@shulha.dev", href: "mailto:oleh@shulha.dev", icon: "mail" },
         { label: "ShulhaOleh", href: "https://github.com/ShulhaOleh", icon: "github" },
         { label: "oleh-shulha", href: "https://linkedin.com/in/oleh-shulha", icon: "linkedin" },
     ],
