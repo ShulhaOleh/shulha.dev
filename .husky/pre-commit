@@ -1,0 +1,3 @@
+bun run format:check || (echo "" && echo "Format errors found. Run: bun run format" && exit 1)
+bun run lint || (echo "" && echo "Lint errors found. Run: bun run lint:fix" && exit 1)
+bun run typecheck || (echo "" && echo "Type errors found, see above." && exit 1)
