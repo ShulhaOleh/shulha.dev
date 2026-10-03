@@ -10,8 +10,8 @@ export const builtProjects: BuiltProject[] = [
         tech: [tech.rust, tech.tauri, tech.react, tech.typescript],
         homepage: "https://modrex.net",
         wide: true,
+        role: "founder",
         featured: {
-            label: "founder",
             summary:
                 "Cross-platform mod manager: one-click installs, mod updates and load-order management across several games. Rust backend, React and TypeScript front end, on Tauri.",
         },
@@ -24,8 +24,8 @@ export const builtProjects: BuiltProject[] = [
         tech: [tech.rust, tech.tauri, tech.react, tech.typescript],
         homepage: "https://refractmc.net",
         wide: true,
+        role: "maintainer",
         featured: {
-            label: "maintainer",
             summary:
                 "Open-source Minecraft launcher with a customizable UI and built-in Modrinth and CurseForge support. I work on Linux support, packaging and the installer.",
         },

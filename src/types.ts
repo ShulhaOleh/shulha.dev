@@ -54,11 +54,11 @@ export interface BuiltProject {
     description: string;
     tech: Tech[];
     years?: string;
+    role?: string;
     tag?: string;
     wide?: boolean;
     homepage?: string;
     featured?: {
-        label: string;
         summary: string;
     };
 }

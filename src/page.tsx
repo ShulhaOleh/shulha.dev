@@ -1,10 +1,10 @@
-import { FrontPanel } from "./components/front.tsx";
+import { AboutPanel } from "./components/about.tsx";
 import { ProjectsPanel } from "./components/projects.tsx";
 import { Sidebar } from "./components/sidebar.tsx";
 import type { ViewModel } from "./data.ts";
 import { personJsonLd } from "./seo.ts";
 
-const bootScript = `(()=>{const d=document.documentElement;d.classList.add("js");d.dataset.tab=location.hash==="#projects"?"projects":"front";d.dataset.filter="all"})()`;
+const bootScript = `(()=>{const d=document.documentElement;d.classList.add("js");d.dataset.tab=location.hash==="#projects"?"projects":"about";d.dataset.filter="all"})()`;
 
 // kitajs doesn't type `media` on <meta>.
 function themeColor(color: string, scheme: "light" | "dark"): string {
@@ -50,7 +50,7 @@ export function Page({ vm }: { vm: ViewModel }) {
                     <div class="mx-auto grid max-w-250 gap-12 px-5 py-10 md:grid-cols-[250px_minmax(0,1fr)] md:gap-16 md:px-10 md:py-16">
                         <Sidebar vm={vm} />
                         <main class="min-w-0">
-                            <FrontPanel vm={vm} />
+                            <AboutPanel vm={vm} />
                             <ProjectsPanel vm={vm} />
                         </main>
                     </div>

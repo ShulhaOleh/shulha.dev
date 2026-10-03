@@ -7,7 +7,7 @@ const modules = join(import.meta.dir, "..", "node_modules");
 const lucide = {
     pin: "map-pin",
     languages: "languages",
-    home: "house",
+    about: "user-round",
     projects: "folder-git-2",
     external: "arrow-up-right",
     merged: "git-merge",

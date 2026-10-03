@@ -1,11 +1,11 @@
-type Tab = "front" | "projects";
+type Tab = "about" | "projects";
 
 const root = document.documentElement;
 const tabLinks = document.querySelectorAll<HTMLAnchorElement>("[data-tab-link]");
 const filterButtons = document.querySelectorAll<HTMLButtonElement>("[data-filter-button]");
 
 function currentTab(): Tab {
-    return location.hash === "#projects" ? "projects" : "front";
+    return location.hash === "#projects" ? "projects" : "about";
 }
 
 function showTab(tab: Tab): void {

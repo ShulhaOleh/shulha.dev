@@ -8,7 +8,7 @@ function TabLink({
     label,
     count,
 }: {
-    tab: "front" | "projects";
+    tab: "about" | "projects";
     icon: IconName;
     label: string;
     count?: number;
@@ -55,7 +55,7 @@ export function Sidebar({ vm }: { vm: ViewModel }) {
             </div>
 
             <nav aria-label="Sections" class="flex gap-6 md:flex-col md:gap-0.5">
-                <TabLink tab="front" icon="home" label="Front" />
+                <TabLink tab="about" icon="about" label="About" />
                 <TabLink
                     tab="projects"
                     icon="projects"

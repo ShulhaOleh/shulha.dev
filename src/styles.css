@@ -79,15 +79,15 @@
     }
 }
 
-html[data-tab="front"] [data-panel="projects"],
-html[data-tab="projects"] [data-panel="front"],
+html[data-tab="about"] [data-panel="projects"],
+html[data-tab="projects"] [data-panel="about"],
 html[data-filter="built"] [data-group="contributed"],
 html[data-filter="contributed"] [data-group="built"],
 html:not(.js) [data-filters] {
     display: none;
 }
 
-html[data-tab="front"] [data-tab-link="front"],
+html[data-tab="about"] [data-tab-link="about"],
 html[data-tab="projects"] [data-tab-link="projects"] {
     @apply font-medium text-ink;
 

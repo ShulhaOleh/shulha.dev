@@ -26,7 +26,7 @@ function FeaturedCard({ project }: { project: BuiltView }) {
             <Avatar src={project.avatar} size="lg" />
             <div>
                 <div class="font-mono text-xs text-muted" safe>
-                    {featured.label}
+                    {project.role}
                 </div>
                 <h3 class="text-lg font-semibold" safe>
                     {project.name}
@@ -112,14 +112,14 @@ function EducationRow({ school }: { school: Education }) {
     );
 }
 
-export function FrontPanel({ vm }: { vm: ViewModel }) {
+export function AboutPanel({ vm }: { vm: ViewModel }) {
     const { profile } = vm;
 
     return (
         <section
-            id="front"
-            data-panel="front"
-            aria-label="Front"
+            id="about"
+            data-panel="about"
+            aria-label="About"
             class="scroll-mt-10 md:scroll-mt-16"
         >
             <p class="text-[21px] leading-normal text-pretty" safe>

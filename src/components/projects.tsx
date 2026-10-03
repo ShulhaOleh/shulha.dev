@@ -25,14 +25,16 @@ function ProjectTile({ project }: { project: BuiltView }) {
                 <span class="group-hover:text-accent" safe>
                     {project.name}
                 </span>
-                {project.tag && (
-                    <span
-                        class="border border-accent px-1.75 py-px font-mono text-[11px] font-normal text-accent"
-                        safe
-                    >
-                        {project.tag}
-                    </span>
-                )}
+                {[project.role, project.tag]
+                    .filter((tag) => tag !== undefined)
+                    .map((tag) => (
+                        <span
+                            class="border border-accent px-1.75 py-px font-mono text-[11px] font-normal text-accent"
+                            safe
+                        >
+                            {tag}
+                        </span>
+                    ))}
             </span>
             <span class="text-muted" safe>
                 {project.description}
