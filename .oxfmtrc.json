@@ -1,0 +1,14 @@
+{
+    "$schema": "./node_modules/oxfmt/configuration_schema.json",
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "printWidth": 100,
+    "trailingComma": "all",
+    "sortPackageJson": false,
+    "sortTailwindcss": {
+        "stylesheet": "./src/styles.css"
+    },
+    "ignorePatterns": ["node_modules", "dist", ".build", "bun.lock", "data", ".wrangler"]
+}

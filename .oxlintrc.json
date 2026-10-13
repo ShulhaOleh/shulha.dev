@@ -1,0 +1,19 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["eslint", "typescript", "unicorn", "oxc"],
+    "categories": {
+        "correctness": "error"
+    },
+    "options": {
+        "typeAware": true
+    },
+    "rules": {
+        "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "typescript/require-array-sort-compare": "off",
+        "typescript/no-explicit-any": "error",
+        "no-empty": "error",
+        "no-regex-spaces": "error",
+        "no-useless-assignment": "error"
+    },
+    "ignorePatterns": ["**/dist/", "**/.build/", "**/.wrangler/"]
+}
