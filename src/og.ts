@@ -40,6 +40,7 @@ export async function renderOgImage(vm: ViewModel): Promise<Buffer> {
             flexDirection: "column",
             justifyContent: "space-between",
             padding: 80,
+            boxSizing: "border-box",
             backgroundColor: colors.page,
             color: colors.ink,
             fontFamily: "Atkinson",
