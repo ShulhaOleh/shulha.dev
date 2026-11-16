@@ -58,14 +58,22 @@ const preloadLinks = preloadFonts
         return `<link rel="preload" as="font" type="font/woff2" href="/fonts/${file}" crossorigin>`;
     })
     .join("");
+
+// The stylesheet is inlined so the first paint doesn't wait for a second request.
 const indexPath = join(outDir, "index.html");
 const bundledHtml = await Bun.file(indexPath).text();
-if (!bundledHtml.includes('<link rel="stylesheet"'))
-    throw new Error("No stylesheet link to preload before");
+const stylesheetLink = /<link rel="stylesheet"[^>]*href="\.\/([\w.-]+\.css)"[^>]*>/.exec(
+    bundledHtml,
+);
+if (!stylesheetLink) throw new Error("No stylesheet link found in the bundled page");
+const cssPath = join(outDir, stylesheetLink[1]!);
+const bundledCss = await Bun.file(cssPath).text();
+if (bundledCss.includes("</style")) throw new Error("Stylesheet can't be inlined safely");
 await Bun.write(
     indexPath,
-    bundledHtml.replace('<link rel="stylesheet"', `${preloadLinks}<link rel="stylesheet"`),
+    bundledHtml.replace(stylesheetLink[0], () => `${preloadLinks}<style>${bundledCss}</style>`),
 );
+await rm(cssPath);
 
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
 await Bun.write(
