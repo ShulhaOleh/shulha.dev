@@ -28,6 +28,8 @@ const devicon = {
 
 const brands = {
     github: si.siGithub,
+    instagram: si.siInstagram,
+    x: si.siX,
     rust: si.siRust,
     typescript: si.siTypescript,
     javascript: si.siJavascript,

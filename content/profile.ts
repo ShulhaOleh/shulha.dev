@@ -16,6 +16,8 @@ export const profile: Profile = {
         { label: "oleh@shulha.dev", href: "mailto:oleh@shulha.dev", icon: "mail" },
         { label: "ShulhaOleh", href: "https://github.com/ShulhaOleh", icon: "github" },
         { label: "oleh-shulha", href: "https://linkedin.com/in/oleh-shulha", icon: "linkedin" },
+        { label: "oleh_shulha", href: "https://x.com/oleh_shulha", icon: "x" },
+        { label: "shulha.dev", href: "https://www.instagram.com/shulha.dev", icon: "instagram" },
         {
             label: "resume.pdf",
             href: "/resume.pdf",
