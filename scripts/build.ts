@@ -45,10 +45,38 @@ for (const file of fontFiles) {
     await Bun.write(join(outDir, "fonts", file), Bun.file(source));
 }
 
+// Bun's HTML bundler tries to resolve preload hrefs, so the links are added after bundling.
+const preloadFonts = [
+    "atkinson-hyperlegible-next-latin-400-normal.woff2",
+    "atkinson-hyperlegible-next-latin-600-normal.woff2",
+    "jetbrains-mono-latin-400-normal.woff2",
+];
+const preloadLinks = preloadFonts
+    .map((file) => {
+        if (!fontFiles.includes(file))
+            throw new Error(`Preloaded font is not in styles.css: ${file}`);
+        return `<link rel="preload" as="font" type="font/woff2" href="/fonts/${file}" crossorigin>`;
+    })
+    .join("");
+const indexPath = join(outDir, "index.html");
+const bundledHtml = await Bun.file(indexPath).text();
+if (!bundledHtml.includes('<link rel="stylesheet"'))
+    throw new Error("No stylesheet link to preload before");
+await Bun.write(
+    indexPath,
+    bundledHtml.replace('<link rel="stylesheet"', `${preloadLinks}<link rel="stylesheet"`),
+);
+
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
 await Bun.write(
     join(outDir, "_headers"),
-    '/resume.pdf\n  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"\n',
+    [
+        "/resume.pdf",
+        '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
+        "/fonts/*",
+        "  Cache-Control: public, max-age=31536000, immutable",
+        "",
+    ].join("\n"),
 );
 await Bun.write(join(outDir, "og.png"), await renderOgImage(vm));
 await Bun.write(join(outDir, "robots.txt"), robotsTxt(vm.profile));
