@@ -45,10 +45,7 @@ const brands = {
 } as const;
 
 export type IconName =
-    | keyof typeof lucide
-    | keyof typeof tabler
-    | keyof typeof devicon
-    | keyof typeof brands;
+    keyof typeof lucide | keyof typeof tabler | keyof typeof devicon | keyof typeof brands;
 
 interface IconData {
     body: string;

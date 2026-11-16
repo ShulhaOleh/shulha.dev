@@ -1,0 +1,5 @@
+[fmt]
+printWidth = 100
+sortTailwindcss = { stylesheet = "./src/styles.css" }
+ignorePatterns = ["bun.lock"]
+sortPackageJson = false
