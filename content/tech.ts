@@ -16,6 +16,7 @@ export const tech = {
     wpf: { name: "WPF", icon: "dotnet" },
     wpfWinforms: { name: "WPF / WinForms", icon: "dotnet" },
     nodejs: { name: "Node.js", icon: "nodejs" },
+    bun: { name: "Bun", icon: "bun" },
     git: { name: "Git", icon: "git" },
     neovim: { name: "Neovim", icon: "neovim" },
     linux: { name: "Linux", icon: "linux" },

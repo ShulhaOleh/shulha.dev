@@ -66,12 +66,16 @@ export const profile: Profile = {
             ],
         },
         {
-            name: "databases",
-            items: [tech.postgresql, tech.mysql, tech.sqlite],
+            name: "frameworks",
+            items: [tech.tauri, tech.react, tech.wpfWinforms],
         },
         {
-            name: "frameworks",
-            items: [tech.tauri, tech.react, tech.wpfWinforms, tech.nodejs],
+            name: "runtimes",
+            items: [tech.nodejs, tech.bun],
+        },
+        {
+            name: "databases",
+            items: [tech.postgresql, tech.mysql, tech.sqlite],
         },
         {
             name: "tools",

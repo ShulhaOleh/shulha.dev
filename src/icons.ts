@@ -38,6 +38,7 @@ const brands = {
     tauri: si.siTauri,
     react: si.siReact,
     nodejs: si.siNodedotjs,
+    bun: si.siBun,
     bash: si.siGnubash,
     git: si.siGit,
     neovim: si.siNeovim,
