@@ -21,8 +21,8 @@ export const profile: Profile = {
         {
             school: "University at Albany",
             degree: "B.S. Computer Science",
-            years: "2026 – 2027",
-            note: ["GPA 4.0. Expected graduation December 2027."],
+            years: "Feb 2026 – Dec 2027",
+            note: ["GPA 4.0."],
             initials: "UA",
             logo: "content/logos/ualbany.png",
             href: "https://www.linkedin.com/school/university-at-albany/",
@@ -30,7 +30,7 @@ export const profile: Profile = {
         {
             school: "Kharkiv Computer Applied College",
             degree: "Associate in Software Engineering",
-            years: "2021 – 2025",
+            years: "Sep 2021 – Jun 2025",
             note: [
                 "GPA 3.88, full scholarship. Diploma project: ",
                 {
@@ -46,7 +46,7 @@ export const profile: Profile = {
         {
             school: "IT STEP Academy",
             degree: "Certificate in Software Engineering",
-            years: "2018 – 2022",
+            years: "Feb 2018 – Jan 2022",
             note: ["GPA 3.54. Kharkiv, Ukraine."],
             initials: "IT",
             logo: "content/logos/itstep.jpg",
