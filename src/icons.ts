@@ -14,6 +14,7 @@ const lucide = {
     open: "git-pull-request",
     star: "star",
     mail: "mail",
+    file: "file-text",
 } as const;
 
 const tabler = {

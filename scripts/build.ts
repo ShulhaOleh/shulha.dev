@@ -45,6 +45,11 @@ for (const file of fontFiles) {
     await Bun.write(join(outDir, "fonts", file), Bun.file(source));
 }
 
+await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
+await Bun.write(
+    join(outDir, "_headers"),
+    '/resume.pdf\n  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"\n',
+);
 await Bun.write(join(outDir, "og.png"), await renderOgImage(vm));
 await Bun.write(join(outDir, "robots.txt"), robotsTxt(vm.profile));
 await Bun.write(join(outDir, "sitemap.xml"), sitemapXml(vm.profile, new Date()));

@@ -66,7 +66,12 @@ export function Sidebar({ vm }: { vm: ViewModel }) {
 
             <div class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[13px] md:flex-col">
                 {profile.links.map((link) => (
-                    <a href={link.href} class="group flex items-center gap-2.5 hover:text-accent">
+                    <a
+                        href={link.href}
+                        target={link.newTab ? "_blank" : undefined}
+                        rel={link.newTab ? "noopener" : undefined}
+                        class="group flex items-center gap-2.5 hover:text-accent"
+                    >
                         <Icon name={link.icon} class="size-4 text-muted group-hover:text-accent" />
                         <span safe>{link.label}</span>
                     </a>

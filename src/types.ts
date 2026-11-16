@@ -11,6 +11,7 @@ export interface ContactLink {
     label: string;
     href: string;
     icon: IconName;
+    newTab?: boolean;
 }
 
 export interface Education {
