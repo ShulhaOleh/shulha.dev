@@ -22,6 +22,7 @@ interface PullRequestPage {
                 number: number;
                 state: PullRequest["state"];
                 createdAt: string;
+                files: { nodes: { path: string; changeType: string }[] } | null;
                 repository: {
                     nameWithOwner: string;
                     url: string;
@@ -60,6 +61,7 @@ const pullRequestQuery = `
                 pageInfo { hasNextPage endCursor }
                 nodes {
                     title url number state createdAt
+                    files(first: 1) { nodes { path changeType } }
                     repository {
                         nameWithOwner url isPrivate
                         owner { login avatarUrl(size: ${AVATAR_SIZE}) }
@@ -127,6 +129,7 @@ export async function queryGithub(token: string): Promise<GithubData> {
                 number: node.number,
                 state: node.state,
                 createdAt: node.createdAt,
+                firstFile: node.files?.nodes[0],
             });
         }
 

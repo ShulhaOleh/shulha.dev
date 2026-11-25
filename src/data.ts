@@ -99,19 +99,34 @@ function buildContributions(snapshot: GithubSnapshot): ContributionGroup[] {
         const searchUrl = `${first.repoUrl}/pulls?q=${encodeURIComponent(`is:pr author:${snapshot.login}`)}`;
         const collapse = contributionRules.collapse.find((rule) => rule.repo === first.repo);
 
-        const lines: ContributionLine[] = collapse
-            ? [
-                  {
-                      title: collapse.title(prs),
-                      url: searchUrl,
-                      merged: prs.some((pr) => pr.state === "MERGED"),
-                  },
-              ]
-            : prs.slice(0, contributionRules.maxPerRepo).map((pr) => ({
-                  title: pr.title,
-                  url: pr.url,
-                  merged: pr.state === "MERGED",
-              }));
+        const entries: PullRequest[][] = [];
+        const byKey = new Map<string, PullRequest[]>();
+        for (const pr of prs) {
+            const key = collapse?.key(pr);
+            if (key === undefined) {
+                entries.push([pr]);
+                continue;
+            }
+            const entry = byKey.get(key);
+            if (entry) {
+                entry.push(pr);
+            } else {
+                byKey.set(key, [pr]);
+                entries.push(byKey.get(key)!);
+            }
+        }
+
+        const lines: ContributionLine[] = entries
+            .slice(0, contributionRules.maxPerRepo)
+            .map((entry) => {
+                const merged = entry.some((pr) => pr.state === "MERGED");
+                if (!collapse || collapse.key(entry[0]!) === undefined) {
+                    return { title: entry[0]!.title, url: entry[0]!.url, merged };
+                }
+                const line = collapse.line(entry);
+                const url = line.url ?? (entry.length === 1 ? entry[0]!.url : searchUrl);
+                return { title: line.title, url, merged };
+            });
 
         return {
             repo: first.repo,
@@ -119,7 +134,7 @@ function buildContributions(snapshot: GithubSnapshot): ContributionGroup[] {
             avatar: avatarPath(snapshot, first.owner),
             count: prs.length,
             lines,
-            more: collapse ? 0 : Math.max(0, prs.length - contributionRules.maxPerRepo),
+            more: Math.max(0, entries.length - contributionRules.maxPerRepo),
             moreUrl: searchUrl,
             latest: first.createdAt,
         };

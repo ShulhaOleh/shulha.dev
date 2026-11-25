@@ -1,4 +1,4 @@
-import type { BuiltProject, ContributionRules } from "../src/types.ts";
+import type { BuiltProject, ContributionRules, PullRequest } from "../src/types.ts";
 import { tech } from "./tech.ts";
 
 export const builtProjects: BuiltProject[] = [
@@ -60,17 +60,54 @@ export const contributionRules: ContributionRules = {
     collapse: [
         {
             repo: "microsoft/winget-pkgs",
-            title: (prs) => {
-                const versions = prs
-                    .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt))
-                    .map((pr) => /version (\S+)/i.exec(pr.title)?.[1])
-                    .filter((version) => version !== undefined);
+            key: (pr) => wingetManifest(pr)?.id,
+            line: (prs) => {
+                const manifests = prs.map(wingetManifest).filter((m) => m !== undefined);
+                const { id, folder } = manifests[0]!;
+                const name = id.split(".").at(-1);
+                const versions = manifests
+                    .filter((m) => m.added)
+                    .map((m) => m.version)
+                    .toSorted(compareVersions);
                 const first = versions.at(0);
                 const last = versions.at(-1);
-                return first && last && first !== last
-                    ? `Modrex release manifests, ${first} to ${last}`
-                    : "Modrex release manifests";
+                const noun = prs.length === 1 ? "release manifest" : "release manifests";
+                const title =
+                    first && last
+                        ? `${name} ${noun}, ${first === last ? first : `${first} to ${last}`}`
+                        : `${name} ${noun}`;
+                const merged = prs.some((pr) => pr.state === "MERGED");
+                const url =
+                    prs.length > 1 && merged
+                        ? `${prs[0]!.repoUrl}/tree/master/${folder}`
+                        : undefined;
+                return { title, url };
             },
         },
     ],
 };
+
+function wingetManifest(pr: PullRequest) {
+    const file = pr.firstFile;
+    const parts = file?.path.split("/") ?? [];
+    if (!file || parts[0] !== "manifests" || parts.length < 6) return undefined;
+    return {
+        id: parts.slice(2, -2).join("."),
+        version: parts.at(-2)!,
+        folder: parts.slice(0, -2).join("/"),
+        added: file.changeType === "ADDED",
+    };
+}
+
+function compareVersions(a: string, b: string): number {
+    const left = a.split(/[.\-+]/);
+    const right = b.split(/[.\-+]/);
+    for (let i = 0; i < Math.max(left.length, right.length); i++) {
+        const x = left[i] ?? "0";
+        const y = right[i] ?? "0";
+        const order =
+            /^\d+$/.test(x) && /^\d+$/.test(y) ? Number(x) - Number(y) : x.localeCompare(y);
+        if (order !== 0) return order;
+    }
+    return 0;
+}

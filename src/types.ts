@@ -66,7 +66,8 @@ export interface BuiltProject {
 
 export interface CollapseRule {
     repo: string;
-    title: (prs: PullRequest[]) => string;
+    key: (pr: PullRequest) => string | undefined;
+    line: (prs: PullRequest[]) => { title: string; url?: string };
 }
 
 export interface ContributionRules {
@@ -96,6 +97,7 @@ export interface PullRequest {
     number: number;
     state: "OPEN" | "CLOSED" | "MERGED";
     createdAt: string;
+    firstFile?: { path: string; changeType: string };
 }
 
 export interface GithubSnapshot {
