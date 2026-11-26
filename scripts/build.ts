@@ -111,14 +111,14 @@ await Promise.all(
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
 await Bun.write(
     join(outDir, "_headers"),
+    // Pages uses only the first block for a path, so each path appears once.
     [
-        "/resume.pdf",
-        '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
+        ...securityHeaders(pages),
         "/assets/*",
         "  Cache-Control: public, max-age=31536000, immutable",
-        ...securityHeaders(pages),
-        // Browsers' built-in PDF viewers can break under a page CSP.
         "/resume.pdf",
+        '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
+        // Browsers' built-in PDF viewers can break under a page CSP.
         "  ! Content-Security-Policy",
         "",
     ].join("\n"),
