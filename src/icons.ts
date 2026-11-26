@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import * as si from "simple-icons";
+import { optimize } from "svgo";
 
 const modules = join(import.meta.dir, "..", "node_modules");
 
@@ -103,12 +104,32 @@ export function iconSvg(name: IconName, className: string): string {
     return `<svg class="${className}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
 
+const optimized = new Map<IconName, string>();
+
+// Rounds path data to 2 decimals, which is far below a pixel at icon sizes and cuts the sprite
+// by about a third. If svgo can't handle an icon, the original drawing is used.
+function optimizedBody(name: IconName, icon: IconData, paint: string): string {
+    const cached = optimized.get(name);
+    if (cached !== undefined) return cached;
+    let body = icon.body;
+    try {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" ${paint}>${icon.body}</svg>`;
+        const { data } = optimize(svg, { multipass: true, floatPrecision: 2 });
+        body = data.slice(data.indexOf(">") + 1, data.lastIndexOf("</svg>"));
+    } catch (error) {
+        console.warn(`svgo couldn't optimize the ${name} icon, using it as is.`, error);
+    }
+    optimized.set(name, body);
+    return body;
+}
+
 // Call after the rest of the page is rendered, so every icon it used is known.
 export function iconSprite(): string {
     const symbols = [...used].map((name) => {
         const icon = icons.get(name)!;
         const paint = icon.stroke ? strokePaint : 'fill="currentColor"';
-        return `<symbol id="i-${name}" viewBox="${icon.viewBox}" ${paint}>${icon.body}</symbol>`;
+        const body = optimizedBody(name, icon, paint);
+        return `<symbol id="i-${name}" viewBox="${icon.viewBox}" ${paint}>${body}</symbol>`;
     });
     used.clear();
     return `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="absolute" aria-hidden="true">${symbols.join("")}</svg>`;
