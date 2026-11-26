@@ -7,6 +7,7 @@ import { resolveImages } from "../src/images.ts";
 import { renderOgImage } from "../src/og.ts";
 import { NotFoundPage } from "../src/not-found.tsx";
 import { Page } from "../src/page.tsx";
+import { securityHeaders } from "../src/security.ts";
 import { robotsTxt, sitemapXml } from "../src/seo.ts";
 
 const dev = process.argv.includes("--dev");
@@ -115,6 +116,10 @@ await Bun.write(
         '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
         "/assets/*",
         "  Cache-Control: public, max-age=31536000, immutable",
+        ...securityHeaders(pages),
+        // Browsers' built-in PDF viewers can break under a page CSP.
+        "/resume.pdf",
+        "  ! Content-Security-Policy",
         "",
     ].join("\n"),
 );
