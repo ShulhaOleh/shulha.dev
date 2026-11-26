@@ -108,7 +108,7 @@ export function iconSprite(): string {
     const symbols = [...used].map((name) => {
         const icon = icons.get(name)!;
         const paint = icon.stroke ? strokePaint : 'fill="currentColor"';
-        return `<symbol id="i-${name}" viewBox="${icon.viewBox}"><g ${paint}>${icon.body}</g></symbol>`;
+        return `<symbol id="i-${name}" viewBox="${icon.viewBox}" ${paint}>${icon.body}</symbol>`;
     });
     used.clear();
     return `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="absolute" aria-hidden="true">${symbols.join("")}</svg>`;
