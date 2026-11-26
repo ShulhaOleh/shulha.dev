@@ -3,6 +3,7 @@ import { ProjectsPanel } from "./components/projects.tsx";
 import { Sidebar } from "./components/sidebar.tsx";
 import type { ViewModel } from "./data.ts";
 import { iconSprite } from "./icons.ts";
+import { sized } from "./images.ts";
 import { personJsonLd } from "./seo.ts";
 
 const bootScript = `(()=>{const d=document.documentElement;d.classList.add("js");d.dataset.tab=location.hash==="#projects"?"projects":"about";d.dataset.filter="all"})()`;
@@ -49,7 +50,7 @@ export function Page({ vm }: { vm: ViewModel }) {
                     <meta property="og:image:height" content="630" />
                     <meta name="twitter:card" content="summary_large_image" />
 
-                    <link rel="icon" href={vm.avatar} />
+                    <link rel="icon" href={sized(vm.avatar, 32)} />
                     <link rel="apple-touch-icon" href={vm.avatar} />
                     <script type="application/ld+json">{personJsonLd(profile)}</script>
 

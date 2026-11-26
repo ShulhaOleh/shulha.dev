@@ -1,4 +1,5 @@
 import type { BuiltView, ViewModel } from "../data.ts";
+import { sized } from "../images.ts";
 import type { Education, RichText } from "../types.ts";
 import { Avatar, ExternalLink, hostOf, Icon, SectionTitle, TechList } from "./ui.tsx";
 
@@ -55,7 +56,7 @@ function FeaturedCard({ project }: { project: BuiltView }) {
 function SchoolLogo({ school }: { school: Education }) {
     const logo = school.logo ? (
         <img
-            src={`../${school.logo}`}
+            src={sized(`../${school.logo}`, 36)}
             alt=""
             width={36}
             height={36}

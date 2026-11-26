@@ -1,5 +1,6 @@
 import type { Children, PropsWithChildren } from "@kitajs/html";
 import { iconSvg, type IconName } from "../icons.ts";
+import { sized } from "../images.ts";
 import type { Tech } from "../types.ts";
 
 export function Icon({ name, class: className = "size-4" }: { name: IconName; class?: string }) {
@@ -15,7 +16,7 @@ export function Avatar({ src, size }: { src: string; size: keyof typeof avatarSi
     const { px, class: className } = avatarSizes[size];
     return (
         <img
-            src={src}
+            src={sized(src, px)}
             alt=""
             width={px}
             height={px}
