@@ -29,6 +29,12 @@ const result = await Bun.build({
     plugins: [tailwind],
     // Bun inlines CSS url() assets as base64, so fonts are copied over below.
     external: ["/fonts/*"],
+    // Every file in assets/ has a content hash in its name, so _headers caches it for a year.
+    naming: {
+        entry: "[dir]/[name].[ext]",
+        chunk: "assets/[name]-[hash].[ext]",
+        asset: "assets/[name]-[hash].[ext]",
+    },
 });
 
 if (!result.success) {
@@ -64,7 +70,7 @@ const preloadLinks = preloadFonts
 // The stylesheet is inlined so the first paint doesn't wait for a second request.
 const indexPath = join(outDir, "index.html");
 const bundledHtml = await Bun.file(indexPath).text();
-const stylesheetLink = /<link rel="stylesheet"[^>]*href="\.\/([\w.-]+\.css)"[^>]*>/.exec(
+const stylesheetLink = /<link rel="stylesheet"[^>]*href="\.\/([\w./-]+\.css)"[^>]*>/.exec(
     bundledHtml,
 );
 if (!stylesheetLink) throw new Error("No stylesheet link found in the bundled page");
@@ -84,6 +90,8 @@ await Bun.write(
         "/resume.pdf",
         '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
         "/fonts/*",
+        "  Cache-Control: public, max-age=31536000, immutable",
+        "/assets/*",
         "  Cache-Control: public, max-age=31536000, immutable",
         "",
     ].join("\n"),
