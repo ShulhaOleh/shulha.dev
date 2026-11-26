@@ -2,6 +2,7 @@ import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import tailwind from "bun-plugin-tailwind";
 import { buildViewModel, loadSnapshot, root } from "../src/data.ts";
+import { subsetFonts } from "../src/fonts.ts";
 import { resolveImages } from "../src/images.ts";
 import { renderOgImage } from "../src/og.ts";
 import { Page } from "../src/page.tsx";
@@ -26,7 +27,7 @@ const result = await Bun.build({
     minify: !dev,
     sourcemap: dev ? "linked" : "none",
     plugins: [tailwind],
-    // Bun inlines CSS url() assets as base64, so fonts are copied over below.
+    // Bun inlines CSS url() assets as base64, so fonts are written by subsetFonts() below.
     external: ["/fonts/*"],
     // Every file in assets/ has a content hash in its name, so _headers caches it for a year.
     naming: {
@@ -41,31 +42,6 @@ if (!result.success) {
     process.exit(1);
 }
 
-const css = await Bun.file(join(root, "src", "styles.css")).text();
-const fontFiles = [...css.matchAll(/\/fonts\/([\w.-]+\.woff2)/g)].map((match) => match[1]!);
-const fontPackages = ["atkinson-hyperlegible-next", "jetbrains-mono"];
-
-for (const file of fontFiles) {
-    const pkg = fontPackages.find((name) => file.startsWith(name));
-    if (!pkg) throw new Error(`No @fontsource package for ${file}`);
-    const source = join(root, "node_modules", "@fontsource", pkg, "files", file);
-    await Bun.write(join(outDir, "fonts", file), Bun.file(source));
-}
-
-// Bun's HTML bundler tries to resolve preload hrefs, so the links are added after bundling.
-const preloadFonts = [
-    "atkinson-hyperlegible-next-latin-400-normal.woff2",
-    "atkinson-hyperlegible-next-latin-600-normal.woff2",
-    "jetbrains-mono-latin-400-normal.woff2",
-];
-const preloadLinks = preloadFonts
-    .map((file) => {
-        if (!fontFiles.includes(file))
-            throw new Error(`Preloaded font is not in styles.css: ${file}`);
-        return `<link rel="preload" as="font" type="font/woff2" href="/fonts/${file}" crossorigin>`;
-    })
-    .join("");
-
 // The stylesheet is inlined so the first paint doesn't wait for a second request.
 const indexPath = join(outDir, "index.html");
 const bundledHtml = await Bun.file(indexPath).text();
@@ -76,10 +52,7 @@ if (!stylesheetLink) throw new Error("No stylesheet link found in the bundled pa
 const cssPath = join(outDir, stylesheetLink[1]!);
 const bundledCss = await Bun.file(cssPath).text();
 if (bundledCss.includes("</style")) throw new Error("Stylesheet can't be inlined safely");
-let finalHtml = bundledHtml.replace(
-    stylesheetLink[0],
-    () => `${preloadLinks}<style>${bundledCss}</style>`,
-);
+let finalHtml = bundledHtml.replace(stylesheetLink[0], () => `<style>${bundledCss}</style>`);
 await rm(cssPath);
 
 // The client script is tiny, so it's inlined too. Dev builds keep the file so its source map works.
@@ -98,6 +71,25 @@ if (!dev) {
     await rm(scriptPath);
 }
 
+// Fonts are cut down to the characters the page uses. Run this on every page the build outputs.
+const fonts = await subsetFonts([finalHtml], outDir);
+finalHtml = fonts.pages[0]!;
+
+// Bun's HTML bundler tries to resolve preload hrefs, so the links are added after bundling.
+const preloadFonts = [
+    "atkinson-hyperlegible-next-latin-400-normal.woff2",
+    "atkinson-hyperlegible-next-latin-600-normal.woff2",
+    "jetbrains-mono-latin-400-normal.woff2",
+];
+const preloadLinks = preloadFonts
+    .map((file) => {
+        const url = fonts.urls.get(file);
+        if (!url) throw new Error(`Preloaded font is not in styles.css: ${file}`);
+        return `<link rel="preload" as="font" type="font/woff2" href="${url}" crossorigin>`;
+    })
+    .join("");
+finalHtml = finalHtml.replace("<style>", () => `${preloadLinks}<style>`);
+
 await Bun.write(indexPath, finalHtml);
 
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
@@ -106,8 +98,6 @@ await Bun.write(
     [
         "/resume.pdf",
         '  Content-Disposition: inline; filename="Oleh-Shulha-Resume.pdf"',
-        "/fonts/*",
-        "  Cache-Control: public, max-age=31536000, immutable",
         "/assets/*",
         "  Cache-Control: public, max-age=31536000, immutable",
         "",
