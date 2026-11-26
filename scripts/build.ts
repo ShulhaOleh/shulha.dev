@@ -2,7 +2,7 @@ import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import tailwind from "bun-plugin-tailwind";
 import { buildViewModel, loadSnapshot, root } from "../src/data.ts";
-import { writeImages } from "../src/images.ts";
+import { resolveImages } from "../src/images.ts";
 import { renderOgImage } from "../src/og.ts";
 import { Page } from "../src/page.tsx";
 import { robotsTxt, sitemapXml } from "../src/seo.ts";
@@ -18,8 +18,7 @@ const html = await Page({ vm });
 await rm(buildDir, { recursive: true, force: true });
 await rm(outDir, { recursive: true, force: true });
 await mkdir(buildDir, { recursive: true });
-await Bun.write(join(buildDir, "index.html"), html);
-await writeImages(buildDir);
+await Bun.write(join(buildDir, "index.html"), await resolveImages(buildDir, html));
 
 const result = await Bun.build({
     entrypoints: [join(buildDir, "index.html")],
