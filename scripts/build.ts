@@ -77,11 +77,29 @@ if (!stylesheetLink) throw new Error("No stylesheet link found in the bundled pa
 const cssPath = join(outDir, stylesheetLink[1]!);
 const bundledCss = await Bun.file(cssPath).text();
 if (bundledCss.includes("</style")) throw new Error("Stylesheet can't be inlined safely");
-await Bun.write(
-    indexPath,
-    bundledHtml.replace(stylesheetLink[0], () => `${preloadLinks}<style>${bundledCss}</style>`),
+let finalHtml = bundledHtml.replace(
+    stylesheetLink[0],
+    () => `${preloadLinks}<style>${bundledCss}</style>`,
 );
 await rm(cssPath);
+
+// The client script is tiny, so it's inlined too. Dev builds keep the file so its source map works.
+if (!dev) {
+    const scriptTag = /<script type="module"[^>]*src="\.\/([\w./-]+\.js)"[^>]*><\/script>/.exec(
+        finalHtml,
+    );
+    if (!scriptTag) throw new Error("No client script found in the bundled page");
+    const scriptPath = join(outDir, scriptTag[1]!);
+    const script = await Bun.file(scriptPath).text();
+    if (script.includes("</script")) throw new Error("Client script can't be inlined safely");
+    finalHtml = finalHtml.replace(
+        scriptTag[0],
+        () => `<script type="module">${script.trim()}</script>`,
+    );
+    await rm(scriptPath);
+}
+
+await Bun.write(indexPath, finalHtml);
 
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
 await Bun.write(
