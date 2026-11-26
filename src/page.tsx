@@ -2,6 +2,7 @@ import { AboutPanel } from "./components/about.tsx";
 import { ProjectsPanel } from "./components/projects.tsx";
 import { Sidebar } from "./components/sidebar.tsx";
 import type { ViewModel } from "./data.ts";
+import { iconSprite } from "./icons.ts";
 import { personJsonLd } from "./seo.ts";
 
 const bootScript = `(()=>{const d=document.documentElement;d.classList.add("js");d.dataset.tab=location.hash==="#projects"?"projects":"about";d.dataset.filter="all"})()`;
@@ -14,6 +15,16 @@ function themeColor(color: string, scheme: "light" | "dark"): string {
 export function Page({ vm }: { vm: ViewModel }) {
     const { profile } = vm;
     const ogImage = `${profile.url}/og.png`;
+    const content = (
+        <div class="mx-auto grid max-w-250 gap-12 px-5 py-10 md:grid-cols-[250px_minmax(0,1fr)] md:gap-16 md:px-10 md:py-16">
+            <Sidebar vm={vm} />
+            <main class="min-w-0">
+                <AboutPanel vm={vm} />
+                <ProjectsPanel vm={vm} />
+            </main>
+        </div>
+    );
+    const sprite = iconSprite();
 
     return (
         <>
@@ -47,13 +58,8 @@ export function Page({ vm }: { vm: ViewModel }) {
                     <script type="module" src="../src/client.ts"></script>
                 </head>
                 <body>
-                    <div class="mx-auto grid max-w-250 gap-12 px-5 py-10 md:grid-cols-[250px_minmax(0,1fr)] md:gap-16 md:px-10 md:py-16">
-                        <Sidebar vm={vm} />
-                        <main class="min-w-0">
-                            <AboutPanel vm={vm} />
-                            <ProjectsPanel vm={vm} />
-                        </main>
-                    </div>
+                    {sprite}
+                    {content}
                 </body>
             </html>
         </>

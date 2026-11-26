@@ -94,9 +94,22 @@ for (const [name, icon] of Object.entries(brands)) {
 const strokePaint =
     'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 
+// Each icon is drawn once in a sprite and every use points at it, so repeated icons cost a few bytes.
+const used = new Set<IconName>();
+
 export function iconSvg(name: IconName, className: string): string {
-    const icon = icons.get(name);
-    if (!icon) throw new Error(`Unknown icon: ${name}`);
-    const paint = icon.stroke ? strokePaint : 'fill="currentColor"';
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" ${paint} class="${className}" aria-hidden="true">${icon.body}</svg>`;
+    if (!icons.has(name)) throw new Error(`Unknown icon: ${name}`);
+    used.add(name);
+    return `<svg class="${className}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+
+// Call after the rest of the page is rendered, so every icon it used is known.
+export function iconSprite(): string {
+    const symbols = [...used].map((name) => {
+        const icon = icons.get(name)!;
+        const paint = icon.stroke ? strokePaint : 'fill="currentColor"';
+        return `<symbol id="i-${name}" viewBox="${icon.viewBox}"><g ${paint}>${icon.body}</g></symbol>`;
+    });
+    used.clear();
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="absolute" aria-hidden="true">${symbols.join("")}</svg>`;
 }
