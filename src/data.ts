@@ -14,6 +14,7 @@ export interface BuiltView extends BuiltProject {
     avatar: string;
     years: string;
     stars: number | null;
+    release: string | null;
 }
 
 export interface ContributionLine {
@@ -64,6 +65,13 @@ function yearRange(createdAt: string, pushedAt: string, now: Date): string {
     return end === String(start) ? end : `${start} – ${end}`;
 }
 
+// Tags like "1.5.0" read as versions with a "v"; other tags are shown as they are.
+// Snapshots fetched before releases were tracked have no field at all.
+function releaseLabel(tag: string | null | undefined): string | null {
+    if (!tag) return null;
+    return /^\d/.test(tag) ? `v${tag}` : tag;
+}
+
 function buildBuilt(snapshot: GithubSnapshot): BuiltView[] {
     const now = new Date(snapshot.fetchedAt);
 
@@ -78,6 +86,7 @@ function buildBuilt(snapshot: GithubSnapshot): BuiltView[] {
             avatar: avatarPath(snapshot, repo.owner),
             years: project.years ?? yearRange(repo.createdAt, repo.pushedAt, now),
             stars: repo.stars >= MIN_STARS_SHOWN ? repo.stars : null,
+            release: releaseLabel(repo.latestRelease),
         };
     });
 }

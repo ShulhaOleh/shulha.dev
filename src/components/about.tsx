@@ -27,7 +27,7 @@ function FeaturedCard({ project }: { project: BuiltView }) {
             <Avatar src={project.avatar} size="lg" />
             <div>
                 <div class="font-mono text-xs text-muted" safe>
-                    {project.role}
+                    {[project.role, project.release].filter((part) => part).join(" · ")}
                 </div>
                 <h3 class="text-lg font-semibold" safe>
                     {project.name}

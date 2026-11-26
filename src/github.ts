@@ -43,6 +43,7 @@ interface RepoNode {
     createdAt: string;
     pushedAt: string;
     owner: Owner;
+    latestRelease: { tagName: string } | null;
 }
 
 export interface GithubData {
@@ -75,6 +76,7 @@ const pullRequestQuery = `
 const repoFields = `
     nameWithOwner url description homepageUrl stargazerCount createdAt pushedAt
     owner { login avatarUrl(size: ${AVATAR_SIZE}) }
+    latestRelease { tagName }
 `;
 
 export async function queryGithub(token: string): Promise<GithubData> {
@@ -159,6 +161,7 @@ export async function queryGithub(token: string): Promise<GithubData> {
             createdAt: node.createdAt,
             pushedAt: node.pushedAt,
             owner: node.owner.login,
+            latestRelease: node.latestRelease?.tagName ?? null,
         };
     });
 
@@ -171,7 +174,12 @@ export async function fingerprint(data: GithubData): Promise<string> {
             .map((pr) => [pr.repo, pr.number, pr.title, pr.state, pr.isPrivate])
             .sort(),
         repos: Object.values(data.repos)
-            .map((repo) => [repo.nameWithOwner, repo.stars, repo.pushedAt.slice(0, 10)])
+            .map((repo) => [
+                repo.nameWithOwner,
+                repo.stars,
+                repo.pushedAt.slice(0, 10),
+                repo.latestRelease,
+            ])
             .sort(),
     };
     const bytes = new TextEncoder().encode(JSON.stringify(shown));

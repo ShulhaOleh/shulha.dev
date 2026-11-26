@@ -51,6 +51,12 @@ function ProjectTile({ project }: { project: BuiltView }) {
                             <span aria-hidden="true">·</span>
                         </>
                     )}
+                    {project.release !== null && (
+                        <>
+                            <span safe>{project.release}</span>
+                            <span aria-hidden="true">·</span>
+                        </>
+                    )}
                     <span safe>{project.years}</span>
                 </span>
             </span>

@@ -85,6 +85,8 @@ export interface RepoSnapshot {
     createdAt: string;
     pushedAt: string;
     owner: string;
+    // Tag of the release GitHub marks as latest; pre-releases and drafts never are.
+    latestRelease: string | null;
 }
 
 export interface PullRequest {
