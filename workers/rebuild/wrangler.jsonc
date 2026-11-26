@@ -3,6 +3,9 @@
     "name": "shulha-dev-rebuild",
     "main": "index.ts",
     "compatibility_date": "2026-10-01",
+    // The worker only runs on its schedule, so it has no public address.
+    "workers_dev": false,
+    "preview_urls": false,
     "triggers": {
         "crons": ["*/15 * * * *"],
     },
