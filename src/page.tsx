@@ -13,6 +13,23 @@ function themeColor(color: string, scheme: "light" | "dark"): string {
     return `<meta name="theme-color" content="${color}" media="(prefers-color-scheme: ${scheme})">`;
 }
 
+// Tags every page shares. Asset paths are relative to .build/, where the pages are written.
+export function BaseHead({ vm, title }: { vm: ViewModel; title: string }) {
+    return (
+        <>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title safe>{title}</title>
+            <meta name="color-scheme" content="light dark" />
+            {themeColor("#fbf1c7", "light")}
+            {themeColor("#282828", "dark")}
+            <link rel="icon" href={sized(vm.avatar, 32)} />
+            <link rel="apple-touch-icon" href={vm.avatar} />
+            <link rel="stylesheet" href="../src/styles.css" />
+        </>
+    );
+}
+
 export function Page({ vm }: { vm: ViewModel }) {
     const { profile } = vm;
     const ogImage = `${profile.url}/og.png`;
@@ -32,13 +49,8 @@ export function Page({ vm }: { vm: ViewModel }) {
             {"<!doctype html>"}
             <html lang="en">
                 <head>
-                    <meta charset="utf-8" />
-                    <meta name="viewport" content="width=device-width, initial-scale=1" />
-                    <title safe>{profile.name}</title>
+                    <BaseHead vm={vm} title={profile.name} />
                     <meta name="description" content={profile.description} />
-                    <meta name="color-scheme" content="light dark" />
-                    {themeColor("#fbf1c7", "light")}
-                    {themeColor("#282828", "dark")}
                     <link rel="canonical" href={`${profile.url}/`} />
 
                     <meta property="og:type" content="website" />
@@ -50,12 +62,9 @@ export function Page({ vm }: { vm: ViewModel }) {
                     <meta property="og:image:height" content="630" />
                     <meta name="twitter:card" content="summary_large_image" />
 
-                    <link rel="icon" href={sized(vm.avatar, 32)} />
-                    <link rel="apple-touch-icon" href={vm.avatar} />
                     <script type="application/ld+json">{personJsonLd(profile)}</script>
 
                     <script>{bootScript}</script>
-                    <link rel="stylesheet" href="../src/styles.css" />
                     <script type="module" src="../src/client.ts"></script>
                 </head>
                 <body>

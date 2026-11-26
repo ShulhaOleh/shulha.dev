@@ -11,6 +11,7 @@ const lucide = {
     about: "user-round",
     projects: "folder-git-2",
     external: "arrow-up-right",
+    back: "arrow-left",
     merged: "git-merge",
     open: "git-pull-request",
     star: "star",

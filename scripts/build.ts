@@ -5,6 +5,7 @@ import { buildViewModel, loadSnapshot, root } from "../src/data.ts";
 import { subsetFonts } from "../src/fonts.ts";
 import { resolveImages } from "../src/images.ts";
 import { renderOgImage } from "../src/og.ts";
+import { NotFoundPage } from "../src/not-found.tsx";
 import { Page } from "../src/page.tsx";
 import { robotsTxt, sitemapXml } from "../src/seo.ts";
 
@@ -14,15 +15,21 @@ const outDir = join(root, "dist");
 const started = performance.now();
 
 const vm = buildViewModel(await loadSnapshot());
-const html = await Page({ vm });
+// Cloudflare Pages serves 404.html with a 404 status for every unknown path.
+const rendered: Record<string, string> = {
+    "index.html": await Page({ vm }),
+    "404.html": await NotFoundPage({ vm }),
+};
+const names = Object.keys(rendered);
 
 await rm(buildDir, { recursive: true, force: true });
 await rm(outDir, { recursive: true, force: true });
 await mkdir(buildDir, { recursive: true });
-await Bun.write(join(buildDir, "index.html"), await resolveImages(buildDir, html));
+const withImages = await resolveImages(buildDir, Object.values(rendered));
+await Promise.all(names.map((name, i) => Bun.write(join(buildDir, name), withImages[i]!)));
 
 const result = await Bun.build({
-    entrypoints: [join(buildDir, "index.html")],
+    entrypoints: names.map((name) => join(buildDir, name)),
     outdir: outDir,
     minify: !dev,
     sourcemap: dev ? "linked" : "none",
@@ -35,6 +42,8 @@ const result = await Bun.build({
         chunk: "assets/[name]-[hash].[ext]",
         asset: "assets/[name]-[hash].[ext]",
     },
+    // Asset paths start at the root, because 404.html is served at any depth.
+    publicPath: "/",
 });
 
 if (!result.success) {
@@ -42,38 +51,39 @@ if (!result.success) {
     process.exit(1);
 }
 
-// The stylesheet is inlined so the first paint doesn't wait for a second request.
-const indexPath = join(outDir, "index.html");
-const bundledHtml = await Bun.file(indexPath).text();
-const stylesheetLink = /<link rel="stylesheet"[^>]*href="\.\/([\w./-]+\.css)"[^>]*>/.exec(
-    bundledHtml,
-);
-if (!stylesheetLink) throw new Error("No stylesheet link found in the bundled page");
-const cssPath = join(outDir, stylesheetLink[1]!);
-const bundledCss = await Bun.file(cssPath).text();
-if (bundledCss.includes("</style")) throw new Error("Stylesheet can't be inlined safely");
-let finalHtml = bundledHtml.replace(stylesheetLink[0], () => `<style>${bundledCss}</style>`);
-await rm(cssPath);
+const inlined = new Set<string>();
 
-// The client script is tiny, so it's inlined too. Dev builds keep the file so its source map works.
-if (!dev) {
-    const scriptTag = /<script type="module"[^>]*src="\.\/([\w./-]+\.js)"[^>]*><\/script>/.exec(
-        finalHtml,
-    );
-    if (!scriptTag) throw new Error("No client script found in the bundled page");
-    const scriptPath = join(outDir, scriptTag[1]!);
-    const script = await Bun.file(scriptPath).text();
-    if (script.includes("</script")) throw new Error("Client script can't be inlined safely");
-    finalHtml = finalHtml.replace(
-        scriptTag[0],
-        () => `<script type="module">${script.trim()}</script>`,
-    );
-    await rm(scriptPath);
+async function inline(html: string, tag: RegExp, wrap: (code: string) => string): Promise<string> {
+    for (const [whole, href] of html.matchAll(tag)) {
+        const path = join(outDir, href!.replace(/^\.?\//, ""));
+        const code = (await Bun.file(path).text()).trim();
+        if (/<\/(style|script)/i.test(code)) throw new Error(`${href} can't be inlined safely`);
+        // A page without scripts still gets an empty bundle from Bun; it's dropped.
+        html = html.replace(whole, () => (code ? wrap(code) : ""));
+        inlined.add(path);
+    }
+    return html;
 }
 
-// Fonts are cut down to the characters the page uses. Run this on every page the build outputs.
-const fonts = await subsetFonts([finalHtml], outDir);
-finalHtml = fonts.pages[0]!;
+let pages: string[] = [];
+for (const name of names) {
+    let html = await Bun.file(join(outDir, name)).text();
+    // Stylesheets are inlined so the first paint doesn't wait for a second request.
+    const stylesheet = /<link rel="stylesheet"[^>]*href="([^"]+\.css)"[^>]*>/g;
+    if (!html.includes('<link rel="stylesheet"')) throw new Error(`No stylesheet in ${name}`);
+    html = await inline(html, stylesheet, (css) => `<style>${css}</style>`);
+    // Scripts are tiny, so they're inlined too. Dev builds keep the files so source maps work.
+    if (!dev) {
+        const script = /<script type="module"[^>]*src="([^"]+\.js)"[^>]*><\/script>/g;
+        html = await inline(html, script, (js) => `<script type="module">${js}</script>`);
+    }
+    pages.push(html);
+}
+await Promise.all([...inlined].map((path) => rm(path)));
+
+// Fonts are cut down to the characters the pages use.
+const fonts = await subsetFonts(pages, outDir);
+pages = fonts.pages;
 
 // Bun's HTML bundler tries to resolve preload hrefs, so the links are added after bundling.
 const preloadFonts = [
@@ -88,9 +98,14 @@ const preloadLinks = preloadFonts
         return `<link rel="preload" as="font" type="font/woff2" href="${url}" crossorigin>`;
     })
     .join("");
-finalHtml = finalHtml.replace("<style>", () => `${preloadLinks}<style>`);
-
-await Bun.write(indexPath, finalHtml);
+await Promise.all(
+    names.map((name, i) =>
+        Bun.write(
+            join(outDir, name),
+            pages[i]!.replace("<style>", () => `${preloadLinks}<style>`),
+        ),
+    ),
+);
 
 await Bun.write(join(outDir, "resume.pdf"), Bun.file(join(root, "content", "resume.pdf")));
 await Bun.write(

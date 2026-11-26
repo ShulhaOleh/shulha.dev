@@ -30,8 +30,9 @@ function groupSizes(sizes: Set<number>): Map<number, number> {
     return target;
 }
 
-// Writes the resized WebP files next to the page and returns the page with real paths.
-export async function resolveImages(buildDir: string, html: string): Promise<string> {
+// Writes the resized WebP files next to the pages and returns the pages with real paths.
+// Pass every page at once so they share one file per image.
+export async function resolveImages(buildDir: string, pages: string[]): Promise<string[]> {
     const outputs = new Map<string, { source: string; size: number }>();
     const paths = new Map<string, string>();
 
@@ -59,7 +60,7 @@ export async function resolveImages(buildDir: string, html: string): Promise<str
     );
     requested.clear();
 
-    return html.replace(TOKEN, (_, size: string, source: string) =>
-        paths.get(`${size},${source}`)!,
+    return pages.map((html) =>
+        html.replace(TOKEN, (_, size: string, source: string) => paths.get(`${size},${source}`)!),
     );
 }

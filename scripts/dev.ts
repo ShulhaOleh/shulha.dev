@@ -69,12 +69,21 @@ Bun.serve({
         const path = normalize(join(outDir, pathname === "/" ? "index.html" : pathname));
         if (!path.startsWith(outDir)) return new Response("Forbidden", { status: 403 });
 
-        const file = Bun.file(path);
-        if (!(await file.exists())) return new Response("Not found", { status: 404 });
+        // Like Cloudflare Pages, unknown paths get 404.html with a 404 status.
+        let file = Bun.file(path);
+        let status = 200;
+        if (!(await file.exists())) {
+            file = Bun.file(join(outDir, "404.html"));
+            status = 404;
+            if (!(await file.exists())) return new Response("Not found", { status });
+        }
 
-        if (path.endsWith(".html")) {
+        if (file.name?.endsWith(".html")) {
             const html = (await file.text()).replace("</body>", `${reloadScript}</body>`);
-            return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+            return new Response(html, {
+                status,
+                headers: { "Content-Type": "text/html; charset=utf-8" },
+            });
         }
         return new Response(file);
     },
